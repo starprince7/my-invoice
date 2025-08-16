@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "my-invoice-guy",
-    "slug": "my-invoice-guy",
+    "name": "invoicely",
+    "slug": "invoicely",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myinvoiceguy",
+    "scheme": "invoicely",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.starprince.my-invoice-guy"
+      "bundleIdentifier": "com.starprince.invoicely"
     },
     "android": {
       "adaptiveIcon": {
@@ -39,6 +39,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1a7df668-6755-4791-a3eb-9f6f05a2727e"
+      }
+    },
+    "owner": "vibraniuumtechnologies"
   }
 }
