@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Proforma Invoice</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        font-size: 10px;
+        line-height: 1.2;
+        padding: 15px;
+        background: #f5f5f5;
+      }
+
+      .invoice-container {
+        width: 210mm;
+        height: 297mm;
+        margin: 0 auto;
+        background: white;
+        padding: 32px 30px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+      }
+
+      .bill-of-lading {
+        flex: 1;
+        max-width: 250px;
+      }
+
+      .bill-number {
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 10px;
+      }
+
+      .bill-subtitle {
+        font-size: 9px;
+        margin-bottom: 10px;
+        color: #666;
+      }
+
+      .reference-box {
+        background: #f2f2f2;
+        padding: 5px 10px;
+        font-weight: bold;
+        font-size: 10px;
+        display: inline-block;
+        border: none;
+        outline: none;
+        font-family: Arial, sans-serif;
+        min-width: 120px;
+        min-height: 30px;
+      }
+
+      .center-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        align-self: self-end;
+      }
+
+      .proforma-label {
+        background: #888;
+        color: white;
+        padding: 8px 25px;
+        font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .proforma-subtitle {
+        font-size: 10px;
+        margin-top: 2px;
+        color: #666;
+      }
+
+      .right-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+
+      .chronopost-logo {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .logo-cube {
+        width: 25px;
+        height: 25px;
+        background: #4a90e2;
+        margin-right: 8px;
+        border-radius: 3px;
+      }
+
+      .logo-text {
+        font-size: 18px;
+        font-weight: bold;
+        color: #4a90e2;
+      }
+
+      .invoice-type {
+        text-align: center;
+        font-size: 9px;
+        line-height: 1.3;
+      }
+
+      .invoice-type div {
+        margin-bottom: 2px;
+      }
+
+      .subtitle-text {
+        font-size: 8px;
+        color: #666;
+        margin-top: 5px;
+      }
+
+      .party-info {
+        display: flex;
+        margin-bottom: 12px;
+        position: relative;
+      }
+
+      .party-info::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: #000;
+        transform: translateX(-0.5px);
+      }
+
+      .shipper,
+      .consignee {
+        width: 50%;
+        padding: 8px 16px;
+        min-height: 240px;
+        position: relative;
+      }
+      .shipper .input-field ,
+      .consignee .input-field {
+        min-height: 25.3px;
+        height: 25.3px;
+        max-height: 250px;
+      }
+
+      .party-title {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 1px;
+        text-align: center;
+      }
+
+      .party-subtitle {
+        font-size: 11px;
+        font-weight: normal;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+
+      .field-description {
+        font-size: 8px;
+        text-align: center;
+        margin-bottom: 10px;
+        line-height: 1;
+      }
+
+      .input-field {
+        background: #f2f2f2;
+        border: none;
+        outline: none;
+        padding: 6px 8px;
+        margin-bottom: 3px;
+        min-height: 23px;
+        width: 100%;
+        resize: none;
+        font-family: Arial, sans-serif;
+        font-size: 10px;
+      }
+
+      .field-label {
+        font-size: 9px;
+        font-weight: bold;
+        margin-bottom: 1px;
+        margin-top: 6px;
+      }
+
+      .field-label-small {
+        font-size: 8px;
+        color: #666;
+        margin-bottom: 3px;
+      }
+
+      .final-use-section {
+        margin-top: 10px;
+      }
+
+      .final-use-checkboxes {
+        margin-bottom: 10px;
+        padding: 8px;
+      }
+
+      .checkbox-row {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+      }
+
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+      }
+
+      .checkbox {
+        width: 15px;
+        height: 15px;
+        margin-right: 8px;
+        cursor: pointer;
+      }
+
+      .checkbox-text {
+        font-size: 9px;
+        text-align: center;
+        line-height: 1.2;
+      }
+
+      .goods-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+        font-size: 8px;
+      }
+
+      .goods-table th,
+      .goods-table td {
+        border: 1px solid #000;
+        padding: 3px;
+        text-align: center;
+        vertical-align: middle;
+      }
+
+      .goods-table th {
+        background: #ffffff;
+        font-weight: bold;
+      }
+
+      .description-cell {
+        text-align: left;
+        width: 180px;
+      }
+
+      .total-row {
+        background: #fdfdfd;
+      }
+
+      .signature-section {
+        margin-top: 10px;
+        font-size: 8px;
+        line-height: 1.3;
+      }
+
+      .signature-text {
+        margin-bottom: 6px;
+      }
+
+      .signature-inputs {
+        display: flex;
+        gap: 15px;
+        margin-top: 8px;
+      }
+
+      .signature-input-box {
+        flex: 1;
+      }
+
+      .signature-input-label {
+        font-size: 8px;
+        margin-bottom: 3px;
+        font-weight: bold;
+      }
+
+      .signature-input-field {
+        background: #f2f2f2;
+        border: none;
+        outline: none;
+        height: 40px;
+        width: 100%;
+        font-family: Arial, sans-serif;
+        font-size: 10px;
+        padding: 5px;
+      }
+
+      .customs-section {
+        font-size: 8px;
+        margin-bottom: 10px;
+      }
+
+      .goods-table .input-field {
+        height: 22.3px;
+        min-height: 22.3px;
+        padding: 3px 5px;
+        font-size: 10px;
+        line-height: 1.2;
+        margin-bottom: 0;
+        background: #ffffff;
+      }
+
+      .add-row-buttons {
+        margin: 10px 0;
+        text-align: center;
+      }
+
+      .add-row-btn {
+        background: #4a90e2;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        margin: 0 5px;
+        font-size: 10px;
+        cursor: pointer;
+        border-radius: 3px;
+        font-family: Arial, sans-serif;
+      }
+
+      .add-row-btn:hover {
+        background: #357abd;
+      }
+
+      .add-row-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+
+      /* Hide buttons when printing or converting to PDF */
+      @media print {
+        .add-row-buttons {
+          display: none !important;
+        }
+      }
+
+      /* Additional styling to make buttons less prominent */
+      .add-row-buttons {
+        margin: 5px 0;
+        text-align: right;
+        opacity: 0.7;
+      }
+
+      .add-row-btn {
+        background: #f8f8f8;
+        color: #666;
+        border: 1px solid #ddd;
+        padding: 4px 8px;
+        margin: 0 2px;
+        font-size: 8px;
+        cursor: pointer;
+        border-radius: 2px;
+        font-family: Arial, sans-serif;
+        transition: all 0.2s;
+      }
+
+      .add-row-btn:hover {
+        background: #e8e8e8;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="invoice-container">
+      <!-- Header Section -->
+      <div class="header">
+        <div class="bill-of-lading">
+          <div class="bill-number">
+            Bill of lading number<br />(Chronopost reference)
+          </div>
+          <div class="bill-subtitle">
+            Numéro de la lettre de transport<br />(Référence Chronopost)
+          </div>
+          <input type="text" class="reference-box" value="PZ33145905SFR" />
+        </div>
+
+        <div class="center-section">
+          <div class="proforma-label">
+            Proforma INVOICE <br />
+            <p style="font-weight: 300; font-size: 12px">Facture proforma</p>
+          </div>
+        </div>
+
+        <div class="right-section">
+          <div class="chronopost-logo">
+            <img
+              src="./chronopost_logo.png"
+              alt="Chronopost Logo"
+              style="width: 120px; height: auto"
+              crossorigin="anonymous"
+            />
+            <!-- <div class="logo-cube"></div>
+            <div class="logo-text">chronopost</div> -->
+          </div>
+          <div class="invoice-type">
+            <div>FREE OF CHARGE</div>
+            <div>NO COMMERCIAL VALUE</div>
+            <div>VALUE FOR CUSTOMS PURPOSES ONLY</div>
+            <div class="subtitle-text">
+              Sans valeur commerciale<br />
+              Valeur pour la douane uniquement
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Party Information -->
+      <div class="party-info">
+        <div class="shipper">
+          <div class="party-title">Shipper/Exporter</div>
+          <div class="party-subtitle">Expéditeur/Exportateur</div>
+          <div class="field-description">
+            Name, address, zip code city, phone number, email and<br />
+            country of exporter<br /><br />
+            Nom, adresse, code postal, ville, numéro de téléphone, email et pays
+          </div>
+
+          <textarea class="input-field"></textarea>
+          <textarea style="height: 46px;" class="input-field"></textarea>
+
+          <div class="field-label">Country of export</div>
+          <div class="field-label-small">Pays d'exportation</div>
+          <textarea class="input-field"></textarea>
+
+          <div class="field-label">Country of destination</div>
+          <div class="field-label-small">Pays de la destination finale</div>
+          <textarea class="input-field"></textarea>
+
+          <div class="field-label">EORI No.</div>
+          <div class="field-label-small">Numéro EORI</div>
+          <textarea class="input-field"></textarea>
+
+          <div class="field-label">Shipper VAT</div>
+          <div class="field-label-small">TVA expéditeur</div>
+          <textarea class="input-field"></textarea>
+
+          <div class="final-use-section">
+            <div class="field-label">FINAL USE</div>
+            <div class="field-label-small">Utilisation finale</div>
+          </div>
+        </div>
+
+        <div class="consignee">
+          <div class="party-title">Consignee</div>
+          <div class="party-subtitle">Destinataire</div>
+          <div class="field-description">
+            Name, address, zip code city, phone number, email and<br />
+            country of importer<br /><br />
+            Nom, adresse, code postal, ville, numéro de téléphone, email et pays
+          </div>
+
+          <textarea class="input-field"></textarea>
+          <textarea style="height: 46px;" class="input-field"></textarea>
+
+          <div class="field-label">Optional information</div>
+          <div class="field-label-small">Informations optionnelles</div>
+          <textarea class="input-field"></textarea>
+
+          <div class="field-label">
+            Identification number (Recipient VAT, CHE, CHE, CNI, CUIL...)
+          </div>
+          <div class="field-label-small">
+            N°identification (N°TVA destinataire, CE, CNI, CUIL...)
+          </div>
+          <textarea class="input-field"></textarea>
+
+          <div class="field-label">INCOTERM</div>
+          <textarea class="input-field"></textarea>
+        </div>
+      </div>
+
+      <!-- Final Use Checkboxes -->
+      <div class="final-use-checkboxes">
+        <div class="checkbox-row">
+          <label class="checkbox-label">
+            <input type="checkbox" class="checkbox" checked />
+            <span class="checkbox-text"
+              ><strong>Gifts</strong><br />Cadeau</span
+            >
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" class="checkbox" />
+            <span class="checkbox-text"
+              ><strong>Personal use</strong><br />Usage personnel</span
+            >
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" class="checkbox" />
+            <span class="checkbox-text"
+              ><strong>Sample</strong><br />Échantillon</span
+            >
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" class="checkbox" />
+            <span class="checkbox-text"
+              ><strong>Intra Company Transfer</strong><br />Envoi intra
+              Société</span
+            >
+          </label>
+        </div>
+      </div>
+
+      <!-- Goods Table -->
+      <table class="goods-table">
+        <thead>
+          <tr>
+            <th style="width: 60px">
+              No of packages<br /><br />Nombre de colis
+            </th>
+            <th class="description-cell">
+              Full detailed description of goods (what is it ? what is it made
+              of ? what is it used for ? what is it a component of ?)<br /><br />Description
+              très détaillée des marchandises<br /><br /><em
+                >Customs tariff code (HS code)<br />Nomenclature douanière (SH
+                code)</em
+              >
+            </th>
+            <th style="width: 50px">Quantity<br /><br />Quantité</th>
+            <th style="width: 60px">
+              Unit of measures (pcs, lbs, kgs...)<br /><br />Unité de mesures
+            </th>
+            <th style="width: 60px">Weight<br /><br />Poids</th>
+            <th style="width: 70px">
+              Unit value (incl. currency)<br /><br />Valeur unitaire
+            </th>
+            <th style="width: 70px">
+              Total value (incl. currency)<br /><br />Valeur unitaire
+            </th>
+            <th style="width: 60px">
+              Country of origin<br /><br />Pays de production
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><textarea class="input-field"></textarea></td>
+            <td class="description-cell">
+              <textarea class="input-field"></textarea>
+            </td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+          </tr>
+          <tr>
+            <td><textarea class="input-field"></textarea></td>
+            <td class="description-cell">
+              <textarea class="input-field"></textarea>
+            </td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+          </tr>
+          <tr>
+            <td><textarea class="input-field"></textarea></td>
+            <td class="description-cell">
+              <textarea class="input-field"></textarea>
+            </td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+          </tr>
+          <tr class="total-row">
+            <td><textarea class="input-field"></textarea></td>
+            <td class="description-cell">
+              <strong>Total weight / Poids total</strong>
+            </td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td>
+              <strong
+                >Total Total invoice value<br /><br />Valeur totale de la
+                facture</strong
+              >
+            </td>
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Add Row Buttons -->
+      <div class="add-row-buttons">
+        <button class="add-row-btn" onclick="addSingleRow()" id="addOneBtn">Add 1 Row</button>
+        <button class="add-row-btn" onclick="addTwoRows()" id="addTwoBtn">Add 2 Rows</button>
+      </div>
+
+      <!-- Legal Text -->
+      <div class="signature-section">
+        <div class="signature-text">
+          <strong
+            >These commodities are licensed for the ultimate destination shown.
+            Ces marchandises sont autorisées pour la destination finale
+            indiquée. The exporter of the products covered by this document
+            declares that, except otherwise clearly indicated, these products
+            are of EEA preferential origin.</strong
+          >
+        </div>
+
+        <div class="signature-text">
+          L'exportateur des produits couverts par le présent document déclare
+          que, sauf indication contraire clairement indiquée, ces produits sont
+          d'origine préférentielle EEE.
+        </div>
+
+        <div class="signature-text">
+          L'expéditeur certifie que les renseignements contenus dans cette
+          facture ou sur cette preuve est finale et correct. Il déclare que
+          toutes les informations contenues dans cette liste sont conformes à la
+          réalité et aux contrôles.
+        </div>
+
+        <div class="signature-inputs">
+          <div class="signature-text">
+            <strong
+              >Signature of shipper / exporter (type name, title and
+              sign)</strong
+            ><br />
+            <strong>Company stamp</strong><br /><br />
+            Nom et signature de l'expéditeur<br />
+            Tampon de l'entreprise
+          </div>
+          <div class="signature-input-box">
+            <input type="text" class="signature-input-field" />
+          </div>
+          <div>
+            <div class="signature-input-label">Date</div>
+            <br />
+            <div style="font-size: 6px">Date</div>
+          </div>
+          <div class="signature-input-box">
+            <input type="text" class="signature-input-field" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let addedRows = 0;
+      const maxRows = 2;
+
+      function createTableRow() {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><textarea class="input-field"></textarea></td>
+          <td class="description-cell">
+            <textarea class="input-field"></textarea>
+          </td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+        `;
+        return row;
+      }
+
+      function updateButtons() {
+        const addOneBtn = document.getElementById('addOneBtn');
+        const addTwoBtn = document.getElementById('addTwoBtn');
+        
+        if (addedRows >= maxRows) {
+          addOneBtn.disabled = true;
+          addTwoBtn.disabled = true;
+        } else if (addedRows === maxRows - 1) {
+          addOneBtn.disabled = false;
+          addTwoBtn.disabled = true;
+        } else {
+          addOneBtn.disabled = false;
+          addTwoBtn.disabled = false;
+        }
+      }
+
+      function addSingleRow() {
+        if (addedRows >= maxRows) return;
+        
+        const tbody = document.querySelector('.goods-table tbody');
+        const totalRow = tbody.querySelector('.total-row');
+        const newRow = createTableRow();
+        
+        tbody.insertBefore(newRow, totalRow);
+        addedRows++;
+        updateButtons();
+      }
+
+      function addTwoRows() {
+        if (addedRows >= maxRows - 1) return;
+        
+        const tbody = document.querySelector('.goods-table tbody');
+        const totalRow = tbody.querySelector('.total-row');
+        
+        for (let i = 0; i < 2 && addedRows < maxRows; i++) {
+          const newRow = createTableRow();
+          tbody.insertBefore(newRow, totalRow);
+          addedRows++;
+        }
+        
+        updateButtons();
+      }
+
+      // Initialize button states
+      updateButtons();
+    </script>
+  </body>
+</html>

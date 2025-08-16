@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            font-size: 12px;
+        }
+        
+        .invoice-container {
+            background: white;
+            padding: 40px;
+            /* border: solid red; */
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            page-break-after: always;
+            box-sizing: border-box;
+        }
+        
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .invoice-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .date {
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        
+        .party-info {
+            margin-bottom: 15px;
+        }
+        
+        .party-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .party-details {
+            margin-bottom: 5px;
+        }
+        
+        .tracking {
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            page-break-inside: avoid;
+        }
+        
+        .items-table th,
+        .items-table td {
+            border-left: 1px solid #333;
+            border-right: 1px solid #333;
+            border-top: 1px solid #ffffff;
+            border-bottom: none;
+            padding: 6px 8px;
+            text-align: left;
+        }
+        
+        .items-table thead tr:first-child th {
+            border-top: 1px solid #333;
+        }
+        
+        .items-table tbody tr:last-child td {
+            border-bottom: 1px solid #333;
+        }
+        
+        .items-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        
+        .items-table .qty-col,
+        .items-table .price-col,
+        .items-table .currency-col {
+            text-align: center;
+            width: 70px;
+        }
+        
+        .total-row {
+            font-weight: bold;
+        }
+        
+        .editable-cell {
+            border: none;
+            background: transparent;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            resize: none;
+            outline: none;
+            overflow: hidden;
+            line-height: 1.2;
+        }
+        
+        .editable-cell:focus {
+            background-color: #f0f8ff;
+            outline: 2px solid #007acc;
+            outline-offset: -1px;
+        }
+        
+        .center-text {
+            text-align: center;
+        }
+        
+        .party-textarea {
+            border: none;
+            background: transparent;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            resize: none;
+            outline: none;
+            line-height: 1.3;
+        }
+        
+        .party-textarea:focus {
+            background-color: #f0f8ff;
+            outline: 2px solid #007acc;
+            outline-offset: -1px;
+        }
+        
+        .name-input {
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            outline: none;
+            padding: 0;
+            margin: 0;
+        }
+        .tracking-input {
+            font-weight: 600;
+        }
+        
+        .name-input:focus {
+            background-color: #f0f8ff;
+        }
+        
+        .footer-info {
+            margin-top: 15px;
+            page-break-inside: avoid;
+        }
+        
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            page-break-inside: avoid;
+        }
+        
+        .signature-line {
+            font-style: italic;
+            color: #666;
+        }
+
+        /* PDF-specific styles */
+        @media print {
+            body {
+                padding: 0;
+                margin: 0;
+                background: none;
+            }
+            
+            .invoice-container {
+                padding: 15px;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .items-table {
+                page-break-inside: avoid;
+            }
+
+            .footer-info, 
+            .signature-section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <h1 class="invoice-title">Invoice</h1>
+        </div>
+        
+        <div class="date">Date: <input type="date" class="name-input" value="06/08/2025"></div>
+        
+        <div class="party-info">
+            <div class="party-label">Sender / expéditeur</div>
+            <div class="party-details">
+                <textarea class="party-textarea" rows="4">Patil koli
+34 Avenue gambetta, 94700. Maison-Alfort France.
+Phone: +33758842511
+Email: vijaypatil771@yahoo.com</textarea>
+            </div>
+        </div>
+        
+        <div class="party-info">
+            <div class="party-label">Consignee / destinataire :</div>
+            <div class="party-details">
+                <textarea class="party-textarea" rows="6">Ritu hanumanti koli
+D/O Hanumanti koli, H: no. 23, Indiranagar tis
+wadi, P O indiranagar chimbel north Goa,
+403006.
+Phone: 9307241851.
+Email: vijaypatil771@yahoo.com</textarea>
+            </div>
+        </div>
+        
+        <div class="tracking">TRACKING NUMBER : <input type="text" class="name-input tracking-input" value="PZ331459055FR"></div>
+        
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th class="qty-col">Qty</th>
+                    <th class="price-col">Price</th>
+                    <th class="currency-col">Currency</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><textarea class="editable-cell">One big size ladies leather classic hand bag carton colour</textarea></td>
+                    <td class="qty-col"><textarea class="editable-cell center-text">1</textarea></td>
+                    <td class="price-col"><textarea class="editable-cell center-text">79</textarea></td>
+                    <td class="currency-col"><textarea class="editable-cell center-text">EUROS</textarea></td>
+                </tr>
+                <tr>
+                    <td><textarea class="editable-cell">one pair of big leather ladies hand bag off-white colour</textarea></td>
+                    <td class="qty-col"><textarea class="editable-cell center-text">1</textarea></td>
+                    <td class="price-col"><textarea class="editable-cell center-text">83</textarea></td>
+                    <td class="currency-col"><textarea class="editable-cell center-text">EUROS</textarea></td>
+                </tr>
+                <tr>
+                    <td><textarea class="editable-cell">One pair of teddy smith sneakers white colours</textarea></td>
+                    <td class="qty-col"><textarea class="editable-cell center-text">1</textarea></td>
+                    <td class="price-col"><textarea class="editable-cell center-text">87</textarea></td>
+                    <td class="currency-col"><textarea class="editable-cell center-text">EUROS</textarea></td>
+                </tr>
+                <tr>
+                    <td><textarea class="editable-cell">one pair of unisex adidas sneakers blue colour</textarea></td>
+                    <td class="qty-col"><textarea class="editable-cell center-text">1</textarea></td>
+                    <td class="price-col"><textarea class="editable-cell center-text">69</textarea></td>
+                    <td class="currency-col"><textarea class="editable-cell center-text">EUROS</textarea></td>
+                </tr>
+                <tr>
+                    <td>
+                        <textarea class="editable-cell">Origin : FRANCE
+Incoterm : DAP
+Gift</textarea>
+                    </td>
+                    <td class="qty-col"><textarea class="editable-cell"></textarea></td>
+                    <td class="price-col"><textarea class="editable-cell"></textarea></td>
+                    <td class="currency-col"><textarea class="editable-cell"></textarea></td>
+                </tr>
+                <tr class="total-row">
+                    <td><textarea class="editable-cell">Total</textarea></td>
+                    <td class="qty-col"><textarea class="editable-cell center-text">4</textarea></td>
+                    <td class="price-col"><textarea class="editable-cell center-text">318</textarea></td>
+                    <td class="currency-col"><textarea class="editable-cell center-text">EUROS</textarea></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="footer-info">
+            <div>NO COMMERCIAL VALUE</div>
+            <div>VALUE FOR CUSTOMS PURPOSES ONLY</div>
+        </div>
+        
+        <div class="signature-section">
+            <div>Name : <input type="text" class="name-input" value="Patil koli"></div>
+            <div>Signature : <span class="signature-line">___________________</span></div>
+        </div>
+    </div>
+</body>
+</html>
