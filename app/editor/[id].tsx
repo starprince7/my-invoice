@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Alert, Platform, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import { templates } from '../../doc-templates/manifest';
+import { PdfApi, bytesToBase64, bytesToBlob } from '../../services/PdfApi';
 
 export default function TemplateEditorScreen() {
   const router = useRouter();
@@ -162,81 +163,87 @@ export default function TemplateEditorScreen() {
     try {
       setExporting(true);
       let htmlToExport = currentHtml || initialHtml;
+      // Desired behavior: use external API. If it fails, fall back to existing local export.
+      const fileBaseName = (template?.title || 'document').replace(/\s+/g, '-').toLowerCase();
+      const apiDownload = true; // set to false to try inline behavior on web
+      const pdfOptions = { margin: { top: '0.4in', right: '0.4in', bottom: '0.6in', left: '0.4in' }, format: 'A4', printBackground: true } as const;
+
       if (Platform.OS === 'web') {
-        // Get latest edits from the iframe document, do not update iframeHtml/state
+        // Capture latest HTML from iframe
         const iframeEl = iframeRef.current as HTMLIFrameElement | null;
         const doc = iframeEl?.contentDocument as Document | undefined;
-        if (doc) {
-          htmlToExport = addPrintCss(snapshotDocument(doc), { compact: false });
-          console.log('[editor:web] Export HTML length:', htmlToExport.length);
+        if (!doc) {
+          console.warn('[editor:web] iframe document not available on export');
+          try { Alert.alert('Error', 'Editor not ready'); } catch { window.alert('Error: Editor not ready'); }
+          return;
+        }
+        htmlToExport = addPrintCss(snapshotDocument(doc), { compact: false });
+
+        try {
+          const resp = await PdfApi.convertHtml({ html: htmlToExport, fileName: fileBaseName, download: apiDownload, pdfOptions });
+          const type = resp.contentType || 'application/pdf';
+          const blob = bytesToBlob(resp.bytes, type);
+          const url = URL.createObjectURL(blob);
+          const cd = resp.contentDisposition || '';
+          const suggestedName = parseFilenameFromContentDisposition(cd) || `${fileBaseName}.pdf`;
+          if (apiDownload) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = suggestedName;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          } else {
+            window.open(url, '_blank');
+          }
+          return;
+        } catch (apiErr) {
+          console.warn('[editor:web] API export failed, falling back to browser print', apiErr);
+          // Fallback to existing browser print path
           const win = iframeEl?.contentWindow as any;
           if (!win) {
-            console.warn('[editor:web] iframe window not available');
             try { Alert.alert('Error', 'Editor not ready'); } catch { window.alert('Error: Editor not ready'); }
             return;
           }
-          // Ensure the iframe shows the snapshot to match export
-          try {
-            win.document.open();
-            win.document.write(htmlToExport);
-            win.document.close();
-          } catch (e) { console.warn('Failed to write snapshot into iframe before print', e); }
-
-          // Inject export-only CSS to stabilize layout at A4 width regardless of viewport
+          try { win.document.open(); win.document.write(htmlToExport); win.document.close(); } catch {}
           try {
             const head = win.document.head || win.document.getElementsByTagName('head')[0];
             if (head && !win.document.getElementById('__export_layout_a4__')) {
               const style = win.document.createElement('style');
               style.id = '__export_layout_a4__';
-              style.textContent = `
-                /* Force consistent print layout on small screens */
-                html, body { overflow: visible !important; background: white !important; }
-                body { width: 794px !important; margin: 0 auto !important; }
-                @media print { body { width: 794px !important; } }
-              `;
+              style.textContent = `html, body { overflow: visible !important; background: white !important; } body { width: 794px !important; margin: 0 auto !important; } @media print { body { width: 794px !important; } }`;
               head.appendChild(style);
             }
-          } catch (e) { console.warn('Failed to inject export layout CSS', e); }
-
-          // Wait for fonts and images to be fully loaded to avoid truncated render
-          try {
-            if (win.document && (win.document as any).fonts && (win.document as any).fonts.ready) {
-              await (win.document as any).fonts.ready;
-            }
           } catch {}
-          try {
-            const imgs = Array.from(win.document.images || []);
-            await Promise.all(imgs.map(img => {
-              if ((img as HTMLImageElement).complete) return Promise.resolve();
-              return new Promise<void>((res) => {
-                img.addEventListener('load', () => res(), { once: true });
-                img.addEventListener('error', () => res(), { once: true });
-              });
-            }));
-          } catch {}
-          await new Promise(res => setTimeout(res, 50));
-
-          // Set document title so browsers may use it as default PDF filename
-          try { win.document.title = `${template?.title || 'document'}`; } catch {}
-          // Trigger browser print dialog; user can choose "Save as PDF"
-          try { win.focus(); } catch {}
-          try { win.print(); } catch (err) { console.warn('window.print failed', err); }
-          return; // Completed web export via print dialog
-        } else {
-          console.warn('[editor:web] iframe document not available on export');
-          try { Alert.alert('Error', 'Editor not ready'); } catch { window.alert('Error: Editor not ready'); }
+          try { if (win.document && (win.document as any).fonts && (win.document as any).fonts.ready) await (win.document as any).fonts.ready; } catch {}
+          try { win.focus(); win.print(); } catch {}
+          return;
         }
       } else {
-        // Native platforms: generate PDF file and share
-        // Ensure we have latest HTML from WebView
+        // Native platforms: request latest HTML then send to API; fallback to Print.printToFileAsync
         requestHtmlFromWebView();
         await new Promise(res => setTimeout(res, 300));
         htmlToExport = addPrintCss(currentHtml || initialHtml, { compact: true });
-        const { uri } = await Print.printToFileAsync({ html: htmlToExport });
-        if (Platform.OS === 'ios' || (await Sharing.isAvailableAsync())) {
-          await Sharing.shareAsync(uri, { UTI: 'com.adobe.pdf', mimeType: 'application/pdf' });
-        } else {
-          Alert.alert('Exported', `PDF saved at: ${uri}`);
+        try {
+          const resp = await PdfApi.convertHtml({ html: htmlToExport, fileName: fileBaseName, download: true, pdfOptions });
+          const base64 = bytesToBase64(resp.bytes);
+          const fileUri = `${FileSystem.cacheDirectory}${fileBaseName}-${Date.now()}.pdf`;
+          await FileSystem.writeAsStringAsync(fileUri, base64, { encoding: FileSystem.EncodingType.Base64 as any });
+          if (Platform.OS === 'ios' || (await Sharing.isAvailableAsync())) {
+            await Sharing.shareAsync(fileUri, { UTI: 'com.adobe.pdf', mimeType: 'application/pdf' });
+          } else {
+            Alert.alert('Exported', `PDF saved at: ${fileUri}`);
+          }
+          return;
+        } catch (apiErr) {
+          console.warn('[editor:native] API export failed, falling back to expo-print', apiErr);
+          const { uri } = await Print.printToFileAsync({ html: htmlToExport });
+          if (Platform.OS === 'ios' || (await Sharing.isAvailableAsync())) {
+            await Sharing.shareAsync(uri, { UTI: 'com.adobe.pdf', mimeType: 'application/pdf' });
+          } else {
+            Alert.alert('Exported', `PDF saved at: ${uri}`);
+          }
         }
       }
     } catch (e) {
@@ -325,6 +332,23 @@ function snapshotDocument(doc: Document): string {
     });
   } catch {}
   return doc.documentElement.outerHTML;
+}
+
+// Parse filename from Content-Disposition header if present
+function parseFilenameFromContentDisposition(cd: string): string | null {
+  try {
+    if (!cd) return null;
+    // Try RFC 5987 format: filename*=UTF-8''...
+    const star = cd.match(/filename\*=([^;]+)/i);
+    if (star && star[1]) {
+      const val = star[1].trim().replace(/^(UTF-8''|"|')/i, '').replace(/("|')$/g, '');
+      try { return decodeURIComponent(val); } catch { return val; }
+    }
+    // Fallback: filename="example.pdf" or filename=example.pdf
+    const plain = cd.match(/filename=\s*"?([^;\"]+)"?/i);
+    if (plain && plain[1]) return plain[1].trim();
+  } catch {}
+  return null;
 }
 
 // (Removed html2pdf loader; using native print dialog on web)

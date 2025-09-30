@@ -25,6 +25,50 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Deploying to EAS Hosting
+
+You can deploy your Expo Web project using **EAS Hosting**.
+
+1. **Export the web build**
+
+   ```bash
+   npx expo export --platform web
+   ```
+
+   This generates a static web build inside the `dist/` directory.
+
+2. **Deploy to EAS Hosting**
+
+   ```bash
+   eas deploy
+   ```
+
+   - This creates a **preview deployment** and gives you a preview URL like:  
+     ```
+     https://your-app--1234.expo.app/
+     ```
+
+3. **Production Deployment**
+
+   To create a production deployment, run:
+
+   ```bash
+   eas deploy --prod
+   ```
+
+   This will give you a stable **production URL** for your web app.
+
+### Notes
+
+- You must be logged in with your Expo account before deploying:
+
+  ```bash
+  npx expo login
+  ```
+
+- You can customize deployments with options like `--alias` or `--export-dir`.  
+- Learn more: [EAS Hosting docs](https://docs.expo.dev/eas/hosting/get-started/)
+
 ## Get a fresh project
 
 When you're ready, run:

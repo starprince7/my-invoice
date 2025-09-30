@@ -161,8 +161,8 @@
       .shipper .input-field ,
       .consignee .input-field {
         min-height: 25.3px;
-        height: 25.3px;
-        max-height: 250px;
+        height: auto;
+        /* max-height: 250px; */
       }
 
       .party-title {
@@ -197,6 +197,9 @@
         resize: none;
         font-family: Arial, sans-serif;
         font-size: 10px;
+        text-align: center;
+        overflow: hidden;
+        transition: height 0.1s ease;
       }
 
       .field-label {
@@ -736,6 +739,56 @@
 
       // Initialize button states
       updateButtons();
+
+      // Auto-resize functionality for textareas
+      function autoResize(textarea) {
+        // Reset height to allow shrinking
+        textarea.style.height = 'auto';
+        
+        // Set new height based on scrollHeight
+        const newHeight = Math.max(textarea.scrollHeight, textarea.getAttribute('data-min-height') || 23);
+        textarea.style.height = newHeight + 'px';
+      }
+
+      // Initialize all textareas
+      document.querySelectorAll('.input-field').forEach(textarea => {
+        // Store original min-height
+        textarea.setAttribute('data-min-height', textarea.offsetHeight);
+        
+        // Initial resize
+        autoResize(textarea);
+        
+        // Add event listeners
+        textarea.addEventListener('input', () => autoResize(textarea));
+        textarea.addEventListener('change', () => autoResize(textarea));
+      });
+
+      // Also handle auto-resize for dynamically added rows
+      function createTableRow() {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><textarea class="input-field"></textarea></td>
+          <td class="description-cell">
+            <textarea class="input-field"></textarea>
+          </td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+          <td><textarea class="input-field"></textarea></td>
+        `;
+        
+        // Initialize auto-resize for new textareas
+        row.querySelectorAll('.input-field').forEach(textarea => {
+          textarea.setAttribute('data-min-height', textarea.offsetHeight);
+          autoResize(textarea);
+          textarea.addEventListener('input', () => autoResize(textarea));
+          textarea.addEventListener('change', () => autoResize(textarea));
+        });
+        
+        return row;
+      }
     </script>
   </body>
 </html>

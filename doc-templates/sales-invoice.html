@@ -184,6 +184,43 @@
             color: #666;
         }
 
+        /* Add Row Button Styles */
+        .add-row-buttons {
+            margin: 5px 0;
+            text-align: right;
+            opacity: 0.7;
+        }
+
+        .add-row-btn {
+            background: #f8f8f8;
+            color: #666;
+            border: 1px solid #ddd;
+            padding: 4px 8px;
+            margin: 0 2px;
+            font-size: 8px;
+            cursor: pointer;
+            border-radius: 2px;
+            font-family: Arial, sans-serif;
+            transition: all 0.2s;
+        }
+
+        .add-row-btn:hover {
+            background: #e8e8e8;
+            color: #333;
+        }
+
+        .add-row-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Hide buttons when printing or converting to PDF */
+        @media print {
+            .add-row-buttons {
+                display: none !important;
+            }
+        }
+
         /* PDF-specific styles */
         @media print {
             body {
@@ -215,7 +252,7 @@
             <h1 class="invoice-title">Invoice</h1>
         </div>
         
-        <div class="date">Date: <input type="date" class="name-input" value="2025-08-06"></div>
+        <div class="date">Date: <input type="date" class="name-input" id="invoice-date"></div>
         
         <div class="party-info">
             <div class="party-label">Sender / expéditeur</div>
@@ -274,7 +311,7 @@ Email: jane.doe@dolor.example</textarea>
                     <td class="price-col"><textarea class="editable-cell center-text">28</textarea></td>
                     <td class="currency-col"><textarea class="editable-cell center-text">EUROS</textarea></td>
                 </tr>
-                <tr>
+                <tr class="add_new_rows_above_here">
                     <td>
                         <textarea class="editable-cell">Origin : FRANCE
 Incoterm : DAP
@@ -292,6 +329,12 @@ Non-commercial sample</textarea>
                 </tr>
             </tbody>
         </table>
+
+        <!-- Add Row Buttons -->
+        <div class="add-row-buttons">
+            <button class="add-row-btn" onclick="addSingleRow()" id="addOneBtn">Add 1 Row</button>
+            <button class="add-row-btn" onclick="addTwoRows()" id="addTwoBtn">Add 2 Rows</button>
+        </div>
         
         <div class="footer-info">
             <div>NO COMMERCIAL VALUE</div>
@@ -303,5 +346,78 @@ Non-commercial sample</textarea>
             <div>Signature : <span class="signature-line">___________________</span></div>
         </div>
     </div>
+
+    <script>
+        // Set the current date when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('invoice-date');
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+            dateInput.value = formattedDate;
+        });
+
+        // Dynamic row functionality
+        let addedRows = 0;
+        const maxRows = 2;
+
+        function createTableRow() {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><textarea class="editable-cell"></textarea></td>
+                <td class="qty-col"><textarea class="editable-cell center-text"></textarea></td>
+                <td class="price-col"><textarea class="editable-cell center-text"></textarea></td>
+                <td class="currency-col"><textarea class="editable-cell center-text"></textarea></td>
+            `;
+            return row;
+        }
+
+        function updateButtons() {
+            const addOneBtn = document.getElementById('addOneBtn');
+            const addTwoBtn = document.getElementById('addTwoBtn');
+            
+            if (addedRows >= maxRows) {
+                addOneBtn.disabled = true;
+                addTwoBtn.disabled = true;
+            } else if (addedRows === maxRows - 1) {
+                addOneBtn.disabled = false;
+                addTwoBtn.disabled = true;
+            } else {
+                addOneBtn.disabled = false;
+                addTwoBtn.disabled = false;
+            }
+        }
+
+        function addSingleRow() {
+            if (addedRows >= maxRows) return;
+            
+            const tbody = document.querySelector('.items-table tbody');
+            const totalRow = tbody.querySelector('.add_new_rows_above_here');
+            const newRow = createTableRow();
+            
+            tbody.insertBefore(newRow, totalRow);
+            addedRows++;
+            updateButtons();
+        }
+
+        function addTwoRows() {
+            if (addedRows >= maxRows - 1) return;
+            
+            const tbody = document.querySelector('.items-table tbody');
+            const totalRow = tbody.querySelector('.add_new_rows_above_here');
+            
+            for (let i = 0; i < 2 && addedRows < maxRows; i++) {
+                const newRow = createTableRow();
+                tbody.insertBefore(newRow, totalRow);
+                addedRows++;
+            }
+            
+            updateButtons();
+        }
+
+        // Initialize button states
+        document.addEventListener('DOMContentLoaded', function() {
+            updateButtons();
+        });
+    </script>
 </body>
 </html>
