@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice</title>
     <style>
+        html, body {
+            height: auto;
+            min-height: auto;
+            overflow-x: hidden;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -22,8 +28,9 @@
             /* border: solid red; */
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            page-break-after: always;
             box-sizing: border-box;
+            min-height: auto;
+            height: auto;
         }
         
         .invoice-header {
@@ -223,6 +230,11 @@
 
         /* PDF-specific styles */
         @media print {
+            html, body {
+                height: auto;
+                min-height: auto;
+            }
+
             body {
                 padding: 0;
                 margin: 0;
@@ -233,6 +245,8 @@
                 padding: 15px;
                 box-shadow: none;
                 border-radius: 0;
+                height: auto;
+                min-height: auto;
             }
 
             .items-table {

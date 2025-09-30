@@ -11,6 +11,12 @@
         box-sizing: border-box;
       }
 
+      html, body {
+        height: auto;
+        min-height: auto;
+        overflow-x: hidden;
+      }
+
       body {
         font-family: Arial, sans-serif;
         font-size: 10px;
@@ -21,7 +27,8 @@
 
       .invoice-container {
         width: 210mm;
-        height: 297mm;
+        height: auto;
+        min-height: auto;
         margin: 0 auto;
         background: white;
         padding: 32px 30px;
