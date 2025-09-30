@@ -158,7 +158,7 @@
         min-height: 240px;
         position: relative;
       }
-      .shipper .input-field ,
+      .shipper .input-field,
       .consignee .input-field {
         min-height: 25.3px;
         height: auto;
@@ -458,23 +458,23 @@
           </div>
 
           <textarea class="input-name-field"></textarea>
-          <textarea style="height: 46px;" class="input-field"></textarea>
+          <textarea style="height: 46px" class="input-name-field"></textarea>
 
           <div class="field-label">Country of export</div>
           <div class="field-label-small">Pays d'exportation</div>
-          <textarea class="input-field"></textarea>
+          <textarea class="input-name-field"></textarea>
 
           <div class="field-label">Country of destination</div>
           <div class="field-label-small">Pays de la destination finale</div>
-          <textarea class="input-field"></textarea>
+          <textarea class="input-name-field"></textarea>
 
           <div class="field-label">EORI No.</div>
           <div class="field-label-small">Numéro EORI</div>
-          <textarea class="input-field"></textarea>
+          <textarea class="input-name-field"></textarea>
 
           <div class="field-label">Shipper VAT</div>
           <div class="field-label-small">TVA expéditeur</div>
-          <textarea class="input-field"></textarea>
+          <textarea class="input-name-field"></textarea>
 
           <div class="final-use-section">
             <div class="field-label">FINAL USE</div>
@@ -492,11 +492,11 @@
           </div>
 
           <textarea class="input-name-field"></textarea>
-          <textarea style="height: 46px;" class="input-field"></textarea>
+          <textarea style="height: 46px" class="input-name-field"></textarea>
 
           <div class="field-label">Optional information</div>
           <div class="field-label-small">Informations optionnelles</div>
-          <textarea class="input-field"></textarea>
+          <textarea class="input-name-field"></textarea>
 
           <div class="field-label">
             Identification number (Recipient VAT, CHE, CHE, CNI, CUIL...)
@@ -504,10 +504,10 @@
           <div class="field-label-small">
             N°identification (N°TVA destinataire, CE, CNI, CUIL...)
           </div>
-          <textarea class="input-field"></textarea>
+          <textarea class="input-name-field"></textarea>
 
           <div class="field-label">INCOTERM</div>
-          <textarea class="input-field"></textarea>
+          <textarea class="input-name-field"></textarea>
         </div>
       </div>
 
@@ -612,10 +612,11 @@
           </tr>
           <tr class="total-row">
             <td><textarea class="input-field"></textarea></td>
-            <td class="description-cell">
+            <td><textarea class="input-field"></textarea></td>
+            <td><textarea class="input-field"></textarea></td>
+            <td class="">
               <strong>Total weight / Poids total</strong>
             </td>
-            <td><textarea class="input-field"></textarea></td>
             <td><textarea class="input-field"></textarea></td>
             <td><textarea class="input-field"></textarea></td>
             <td>
@@ -625,15 +626,18 @@
               >
             </td>
             <td><textarea class="input-field"></textarea></td>
-            <td><textarea class="input-field"></textarea></td>
           </tr>
         </tbody>
       </table>
 
       <!-- Add Row Buttons -->
       <div class="add-row-buttons">
-        <button class="add-row-btn" onclick="addSingleRow()" id="addOneBtn">Add 1 Row</button>
-        <button class="add-row-btn" onclick="addTwoRows()" id="addTwoBtn">Add 2 Rows</button>
+        <button class="add-row-btn" onclick="addSingleRow()" id="addOneBtn">
+          Add 1 Row
+        </button>
+        <button class="add-row-btn" onclick="addTwoRows()" id="addTwoBtn">
+          Add 2 Rows
+        </button>
       </div>
 
       <!-- Legal Text -->
@@ -691,7 +695,7 @@
       const maxRows = 2;
 
       function createTableRow() {
-        const row = document.createElement('tr');
+        const row = document.createElement("tr");
         row.innerHTML = `
           <td><textarea class="input-field"></textarea></td>
           <td class="description-cell">
@@ -708,9 +712,9 @@
       }
 
       function updateButtons() {
-        const addOneBtn = document.getElementById('addOneBtn');
-        const addTwoBtn = document.getElementById('addTwoBtn');
-        
+        const addOneBtn = document.getElementById("addOneBtn");
+        const addTwoBtn = document.getElementById("addTwoBtn");
+
         if (addedRows >= maxRows) {
           addOneBtn.disabled = true;
           addTwoBtn.disabled = true;
@@ -725,11 +729,11 @@
 
       function addSingleRow() {
         if (addedRows >= maxRows) return;
-        
-        const tbody = document.querySelector('.goods-table tbody');
-        const totalRow = tbody.querySelector('.total-row');
+
+        const tbody = document.querySelector(".goods-table tbody");
+        const totalRow = tbody.querySelector(".total-row");
         const newRow = createTableRow();
-        
+
         tbody.insertBefore(newRow, totalRow);
         addedRows++;
         updateButtons();
@@ -737,16 +741,16 @@
 
       function addTwoRows() {
         if (addedRows >= maxRows - 1) return;
-        
-        const tbody = document.querySelector('.goods-table tbody');
-        const totalRow = tbody.querySelector('.total-row');
-        
+
+        const tbody = document.querySelector(".goods-table tbody");
+        const totalRow = tbody.querySelector(".total-row");
+
         for (let i = 0; i < 2 && addedRows < maxRows; i++) {
           const newRow = createTableRow();
           tbody.insertBefore(newRow, totalRow);
           addedRows++;
         }
-        
+
         updateButtons();
       }
 
@@ -756,42 +760,45 @@
       // Auto-resize functionality for textareas
       function autoResize(textarea) {
         // Reset height to allow shrinking
-        textarea.style.height = 'auto';
-        
+        textarea.style.height = "auto";
+
         // Set new height based on scrollHeight
-        const newHeight = Math.max(textarea.scrollHeight, textarea.getAttribute('data-min-height') || 23);
-        textarea.style.height = newHeight + 'px';
+        const newHeight = Math.max(
+          textarea.scrollHeight,
+          textarea.getAttribute("data-min-height") || 23
+        );
+        textarea.style.height = newHeight + "px";
       }
 
       // Initialize all textareas
-      document.querySelectorAll('.input-field').forEach(textarea => {
+      document.querySelectorAll(".input-field").forEach((textarea) => {
         // Store original min-height
-        textarea.setAttribute('data-min-height', textarea.offsetHeight);
-        
+        textarea.setAttribute("data-min-height", textarea.offsetHeight);
+
         // Initial resize
         autoResize(textarea);
-        
+
         // Add event listeners
-        textarea.addEventListener('input', () => autoResize(textarea));
-        textarea.addEventListener('change', () => autoResize(textarea));
+        textarea.addEventListener("input", () => autoResize(textarea));
+        textarea.addEventListener("change", () => autoResize(textarea));
       });
 
       // Initialize all textareas for Shipper/Expoter Name & Cosignee/Receiver
-      document.querySelectorAll('.input-name-field').forEach(textarea => {
+      document.querySelectorAll(".input-name-field").forEach((textarea) => {
         // Store original min-height
-        textarea.setAttribute('data-min-height', textarea.offsetHeight);
-        
+        textarea.setAttribute("data-min-height", textarea.offsetHeight);
+
         // Initial resize
         autoResize(textarea);
-        
+
         // Add event listeners
-        textarea.addEventListener('input', () => autoResize(textarea));
-        textarea.addEventListener('change', () => autoResize(textarea));
+        textarea.addEventListener("input", () => autoResize(textarea));
+        textarea.addEventListener("change", () => autoResize(textarea));
       });
 
       // Also handle auto-resize for dynamically added rows
       function createTableRow() {
-        const row = document.createElement('tr');
+        const row = document.createElement("tr");
         row.innerHTML = `
           <td><textarea class="input-field"></textarea></td>
           <td class="description-cell">
@@ -804,15 +811,15 @@
           <td><textarea class="input-field"></textarea></td>
           <td><textarea class="input-field"></textarea></td>
         `;
-        
+
         // Initialize auto-resize for new textareas
-        row.querySelectorAll('.input-field').forEach(textarea => {
-          textarea.setAttribute('data-min-height', textarea.offsetHeight);
+        row.querySelectorAll(".input-field").forEach((textarea) => {
+          textarea.setAttribute("data-min-height", textarea.offsetHeight);
           autoResize(textarea);
-          textarea.addEventListener('input', () => autoResize(textarea));
-          textarea.addEventListener('change', () => autoResize(textarea));
+          textarea.addEventListener("input", () => autoResize(textarea));
+          textarea.addEventListener("change", () => autoResize(textarea));
         });
-        
+
         return row;
       }
     </script>
