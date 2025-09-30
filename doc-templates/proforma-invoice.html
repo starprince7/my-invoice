@@ -698,6 +698,8 @@
     </div>
 
     <script>
+      // Storage key for this document
+      const STORAGE_KEY = 'proforma-invoice-data';
       let addedRows = 0;
       const maxRows = 2;
 
@@ -764,6 +766,95 @@
       // Initialize button states
       updateButtons();
 
+      // Functions for localStorage persistence
+      function saveToLocalStorage() {
+        const data = {
+          referenceBox: document.querySelector('.reference-box').value,
+          inputFields: {},
+          inputNameFields: {},
+          signatureFields: [],
+          addedRows: addedRows
+        };
+
+        // Save all regular input fields
+        document.querySelectorAll('.input-field').forEach((field, index) => {
+          data.inputFields[index] = field.value;
+        });
+
+        // Save all name input fields
+        document.querySelectorAll('.input-name-field').forEach((field, index) => {
+          data.inputNameFields[index] = field.value;
+        });
+
+        // Save signature fields
+        document.querySelectorAll('.signature-input-field').forEach((field, index) => {
+          data.signatureFields[index] = field.value;
+        });
+
+        // Save to localStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+
+      function loadFromLocalStorage() {
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (!savedData) return;
+        
+        const data = JSON.parse(savedData);
+        
+        // Restore reference box
+        if (document.querySelector('.reference-box')) {
+          document.querySelector('.reference-box').value = data.referenceBox || '';
+        }
+        
+        // Restore input fields
+        if (data.inputFields) {
+          document.querySelectorAll('.input-field').forEach((field, index) => {
+            if (data.inputFields[index] !== undefined) {
+              field.value = data.inputFields[index];
+              // Trigger resize for textareas
+              if (field.tagName === 'TEXTAREA') {
+                autoResize(field);
+              }
+            }
+          });
+        }
+        
+        // Restore name input fields
+        if (data.inputNameFields) {
+          document.querySelectorAll('.input-name-field').forEach((field, index) => {
+            if (data.inputNameFields[index] !== undefined) {
+              field.value = data.inputNameFields[index];
+              // Trigger resize for textareas
+              if (field.tagName === 'TEXTAREA') {
+                autoResize(field);
+              }
+            }
+          });
+        }
+        
+        // Restore signature fields
+        if (data.signatureFields) {
+          document.querySelectorAll('.signature-input-field').forEach((field, index) => {
+            if (data.signatureFields[index] !== undefined) {
+              field.value = data.signatureFields[index];
+            }
+          });
+        }
+        
+        // Restore added rows if needed
+        if (data.addedRows && data.addedRows > 0) {
+          // Add the saved number of rows
+          for (let i = 0; i < data.addedRows; i++) {
+            if (i === 0) {
+              addSingleRow();
+            } else {
+              // Use a setTimeout to ensure the first row is added before adding the second
+              setTimeout(() => addSingleRow(), 100);
+            }
+          }
+        }
+      }
+
       // Auto-resize functionality for textareas
       function autoResize(textarea) {
         // Reset height to allow shrinking
@@ -786,8 +877,14 @@
         autoResize(textarea);
 
         // Add event listeners
-        textarea.addEventListener("input", () => autoResize(textarea));
-        textarea.addEventListener("change", () => autoResize(textarea));
+        textarea.addEventListener("input", () => {
+          autoResize(textarea);
+          saveToLocalStorage();
+        });
+        textarea.addEventListener("change", () => {
+          autoResize(textarea);
+          saveToLocalStorage();
+        });
       });
 
       // Initialize all textareas for Shipper/Expoter Name & Cosignee/Receiver
@@ -799,8 +896,25 @@
         autoResize(textarea);
 
         // Add event listeners
-        textarea.addEventListener("input", () => autoResize(textarea));
-        textarea.addEventListener("change", () => autoResize(textarea));
+        textarea.addEventListener("input", () => {
+          autoResize(textarea);
+          saveToLocalStorage();
+        });
+        textarea.addEventListener("change", () => {
+          autoResize(textarea);
+          saveToLocalStorage();
+        });
+      });
+      
+      // Add event listeners to other input fields
+      document.querySelectorAll('.reference-box, .signature-input-field').forEach(input => {
+        input.addEventListener('input', saveToLocalStorage);
+        input.addEventListener('change', saveToLocalStorage);
+      });
+      
+      // Load saved data when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        loadFromLocalStorage();
       });
 
       // Also handle auto-resize for dynamically added rows
@@ -819,12 +933,18 @@
           <td><textarea class="input-field"></textarea></td>
         `;
 
-        // Initialize auto-resize for new textareas
+        // Initialize auto-resize and persistence for new textareas
         row.querySelectorAll(".input-field").forEach((textarea) => {
           textarea.setAttribute("data-min-height", textarea.offsetHeight);
           autoResize(textarea);
-          textarea.addEventListener("input", () => autoResize(textarea));
-          textarea.addEventListener("change", () => autoResize(textarea));
+          textarea.addEventListener("input", () => {
+            autoResize(textarea);
+            saveToLocalStorage();
+          });
+          textarea.addEventListener("change", () => {
+            autoResize(textarea);
+            saveToLocalStorage();
+          });
         });
 
         return row;

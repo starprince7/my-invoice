@@ -362,6 +362,9 @@ Non-commercial sample</textarea>
     </div>
 
     <script>
+        // Storage key for this document
+        const STORAGE_KEY = 'sales-invoice-data';
+        
         // Set the current date when the page loads
         document.addEventListener('DOMContentLoaded', function() {
             const dateInput = document.getElementById('invoice-date');
@@ -431,7 +434,123 @@ Non-commercial sample</textarea>
         // Initialize button states
         document.addEventListener('DOMContentLoaded', function() {
             updateButtons();
+            loadFromLocalStorage();
         });
+
+        // Functions for localStorage persistence
+        function saveToLocalStorage() {
+            const data = {
+                date: document.getElementById('invoice-date').value,
+                trackingNumber: document.querySelector('.tracking-input').value,
+                partyTextareas: {},
+                editableCells: {},
+                nameInputs: {},
+                addedRows: addedRows
+            };
+
+            // Save all party textareas (sender/consignee info)
+            document.querySelectorAll('.party-textarea').forEach((field, index) => {
+                data.partyTextareas[index] = field.value;
+            });
+
+            // Save all editable cells (table data)
+            document.querySelectorAll('.editable-cell').forEach((field, index) => {
+                data.editableCells[index] = field.value;
+            });
+
+            // Save all name inputs
+            document.querySelectorAll('.name-input:not(#invoice-date):not(.tracking-input)').forEach((field, index) => {
+                data.nameInputs[index] = field.value;
+            });
+
+            // Save to localStorage
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (!savedData) return;
+            
+            const data = JSON.parse(savedData);
+            
+            // Restore date if not today
+            if (data.date) {
+                document.getElementById('invoice-date').value = data.date;
+            }
+            
+            // Restore tracking number
+            if (data.trackingNumber) {
+                document.querySelector('.tracking-input').value = data.trackingNumber;
+            }
+            
+            // Restore party textareas
+            if (data.partyTextareas) {
+                document.querySelectorAll('.party-textarea').forEach((field, index) => {
+                    if (data.partyTextareas[index] !== undefined) {
+                        field.value = data.partyTextareas[index];
+                    }
+                });
+            }
+            
+            // Restore editable cells
+            if (data.editableCells) {
+                document.querySelectorAll('.editable-cell').forEach((field, index) => {
+                    if (data.editableCells[index] !== undefined) {
+                        field.value = data.editableCells[index];
+                    }
+                });
+            }
+            
+            // Restore name inputs
+            if (data.nameInputs) {
+                document.querySelectorAll('.name-input:not(#invoice-date):not(.tracking-input)').forEach((field, index) => {
+                    if (data.nameInputs[index] !== undefined) {
+                        field.value = data.nameInputs[index];
+                    }
+                });
+            }
+            
+            // Restore added rows if needed
+            if (data.addedRows && data.addedRows > 0) {
+                // Add the saved number of rows
+                for (let i = 0; i < data.addedRows; i++) {
+                    if (i === 0) {
+                        addSingleRow();
+                    } else {
+                        // Use a setTimeout to ensure the first row is added before adding the second
+                        setTimeout(() => addSingleRow(), 100);
+                    }
+                }
+            }
+        }
+
+        // Add event listeners to all input fields for auto-saving
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to all input fields
+            document.querySelectorAll('.party-textarea, .editable-cell, .name-input').forEach(field => {
+                field.addEventListener('input', saveToLocalStorage);
+                field.addEventListener('change', saveToLocalStorage);
+            });
+        });
+
+        // Update createTableRow to add event listeners to new fields
+        function createTableRow() {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><textarea class="editable-cell"></textarea></td>
+                <td class="qty-col"><textarea class="editable-cell center-text"></textarea></td>
+                <td class="price-col"><textarea class="editable-cell center-text"></textarea></td>
+                <td class="currency-col"><textarea class="editable-cell center-text"></textarea></td>
+            `;
+            
+            // Add event listeners to new fields
+            row.querySelectorAll('.editable-cell').forEach(field => {
+                field.addEventListener('input', saveToLocalStorage);
+                field.addEventListener('change', saveToLocalStorage);
+            });
+            
+            return row;
+        }
     </script>
 </body>
 </html>
