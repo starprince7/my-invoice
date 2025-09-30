@@ -3,6 +3,7 @@ Got it — here’s the summary in raw markdown:
 # Expo EAS Hosting – Quick Command Guide
 
 ## 1. Install EAS CLI
+
 ```bash
 npm install --global eas-cli
 
@@ -33,3 +34,4 @@ eas deploy
 
 ✅ Workflow: Install CLI → Login → Export → Deploy
 
+```
