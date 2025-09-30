@@ -162,7 +162,6 @@
       .consignee .input-field {
         min-height: 25.3px;
         height: auto;
-        /* max-height: 250px; */
       }
 
       .party-title {
@@ -198,6 +197,20 @@
         font-family: Arial, sans-serif;
         font-size: 10px;
         text-align: center;
+        overflow: hidden;
+        transition: height 0.1s ease;
+      }
+      .input-name-field {
+        background: #f2f2f2;
+        border: none;
+        outline: none;
+        padding: 6px 8px;
+        margin-bottom: 3px;
+        min-height: 23px;
+        width: 100%;
+        resize: none;
+        font-family: Arial, sans-serif;
+        font-size: 10px;
         overflow: hidden;
         transition: height 0.1s ease;
       }
@@ -444,7 +457,7 @@
             Nom, adresse, code postal, ville, numéro de téléphone, email et pays
           </div>
 
-          <textarea class="input-field"></textarea>
+          <textarea class="input-name-field"></textarea>
           <textarea style="height: 46px;" class="input-field"></textarea>
 
           <div class="field-label">Country of export</div>
@@ -478,7 +491,7 @@
             Nom, adresse, code postal, ville, numéro de téléphone, email et pays
           </div>
 
-          <textarea class="input-field"></textarea>
+          <textarea class="input-name-field"></textarea>
           <textarea style="height: 46px;" class="input-field"></textarea>
 
           <div class="field-label">Optional information</div>
@@ -752,6 +765,19 @@
 
       // Initialize all textareas
       document.querySelectorAll('.input-field').forEach(textarea => {
+        // Store original min-height
+        textarea.setAttribute('data-min-height', textarea.offsetHeight);
+        
+        // Initial resize
+        autoResize(textarea);
+        
+        // Add event listeners
+        textarea.addEventListener('input', () => autoResize(textarea));
+        textarea.addEventListener('change', () => autoResize(textarea));
+      });
+
+      // Initialize all textareas for Shipper/Expoter Name & Cosignee/Receiver
+      document.querySelectorAll('.input-name-field').forEach(textarea => {
         // Store original min-height
         textarea.setAttribute('data-min-height', textarea.offsetHeight);
         
